@@ -6,8 +6,12 @@ tk = Tk()
 canvas = Canvas(tk, width=500, height=500)
 canvas.pack()
 
+class Game:
+    def __init__(self):
+        self.speed = 1
+
 class Ball:
-    def __init__(self, canvas, paddle, color):
+    def __init__(self, canvas, paddle, game, color):
         self.canvas = canvas
         self.paddle = paddle
         self.id = canvas.create_oval(10, 10, 25, 25, fill=color)
@@ -27,10 +31,8 @@ class Ball:
                 return True
         return False
     
-    speed = 1
-
     def draw(self):
-        self.canvas.move(self.id, self.x, self.y * self.speed)
+        self.canvas.move(self.id, self.x, self.y * game.speed)
         pos = self.canvas.coords(self.id)
         if pos[1] <= 0:
             self.y = 3
@@ -42,10 +44,9 @@ class Ball:
             self.x = -3
         if self.hit_paddle(pos):
             self.y = -3
-            self.speed += 0.5
 
 class Paddle:
-    def __init__(self, canvas, color):
+    def __init__(self, canvas, game, color):
         self.canvas = canvas
         self.id = canvas.create_rectangle(0, 0, 100, 10, fill=color)
         self.canvas.move(self.id, 200, 300)
@@ -58,10 +59,10 @@ class Paddle:
         self.canvas.focus_set()
 
     def turn_left(self, evt):
-        self.x = -2
+        self.x = -2 * game.speed
 
     def turn_right(self, evt):
-        self.x = 2
+        self.x = 2 * game.speed
 
     def stop(self, evt):
         self.x = 0
@@ -135,8 +136,9 @@ tk.update()
 
 countdown(5)
 
-paddle = Paddle(canvas, 'blue')
-ball = Ball(canvas, paddle, 'red')
+game = Game()
+paddle = Paddle(canvas, game, 'blue')
+ball = Ball(canvas, paddle, game, 'red')
 scoreboard = Scoreboard(canvas)
 
 while ball.hit_bottom == False:
@@ -147,6 +149,7 @@ while ball.hit_bottom == False:
     
     if ball.hit_paddle(pos):
         scoreboard.current_score += 1
+        game.speed += 0.5
         ball.y = -3
     
     ball.draw()
