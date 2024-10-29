@@ -74,6 +74,31 @@ class Paddle:
         elif pos[2] >= self.canvas_width:
             self.x = 0
 
+class Scoreboard:
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self.score_id = None
+        self.scoreboard_id = None
+        self.current_score = 0
+    
+    def delete(self):
+        if self.scoreboard_id:
+            self.canvas.delete(self.scoreboard_id)
+        
+        if self.score_id:
+            self.canvas.delete(self.score_id)
+    
+    def draw(self):
+        # Draw the rectangle for the scoreboard.
+        if not self.scoreboard_id:
+            self.scoreboard_id = canvas.create_rectangle(400, 10, 499, 100, outline="")
+
+        # Draw the numbers on the score board.
+        if self.score_id:
+            self.canvas.delete(self.score_id)
+
+        self.score_id = canvas.create_text(450, 450, text='%s' % (self.current_score), font=('Times', 12))
+
 def countdown(number):
     current_number = number
     for x in range(1, number + 1):
@@ -94,30 +119,15 @@ def countdown(number):
         canvas.delete(id)
         tk.update()
 
-current_score = 0
-
-def score_board():
-    global current_score
-    if current_score <= 10:
-        if current_score == 10:
-            canvas.delete(id)
-            canvas.create_text(250, 250, text='You win!!!',
-            font=('Times', 22))
-            tk.update()
-            time.sleep(1000)
-        canvas.create_rectangle(400, 10, 499, 100, outline="")
-        tk.update()
-        id = canvas.create_text(450, 450, text='%s' % (current_score),
-        font=('Times', 12))
-        tk.update()
-
-
 def game_over():
     print('Oh no! You lost!')
     time.sleep(1)
     canvas.create_text(250, 250, text='Game Over!!!',
     font=('Times', 22))
 
+
+
+# Game Loop
 tk.title("Game")
 tk.resizable(0, 0)
 tk.wm_attributes("-topmost", 1)
@@ -127,19 +137,22 @@ countdown(5)
 
 paddle = Paddle(canvas, 'blue')
 ball = Ball(canvas, paddle, 'red')
+scoreboard = Scoreboard(canvas)
 
 while ball.hit_bottom == False:
+    if scoreboard.current_score > 0:
+        scoreboard.draw()
+
     pos = ball.canvas.coords(ball.id)
+    
     if ball.hit_paddle(pos):
-        current_score += 1
-        canvas.delete(id)
+        scoreboard.current_score += 1
         ball.y = -3
-    score_board()
+    
     ball.draw()
     paddle.draw()
     tk.update_idletasks()
     tk.update()
-    time.sleep(0.01)
 
 
 if ball.hit_bottom == True:
